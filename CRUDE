@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee CRUD</title>
+</head>
+<body>
+    <h1>Employee Management</h1>
+    <form id="employeeForm">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="text" id="position" placeholder="Position" required>
+        <input type="text" id="department" placeholder="Department" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <button type="submit">Add Employee</button>
+    </form>
+
+    <ul id="employeeList"></ul>
+
+    <script>
+        const employeeForm = document.getElementById('employeeForm');
+        const employeeList = document.getElementById('employeeList');
+
+        employeeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const employeeData = {
+                name: document.getElementById('name').value,
+                position: document.getElementById('position').value,
+                department: document.getElementById('department').value,
+                email: document.getElementById('email').value,
+            };
+
+            await fetch('http://localhost:5000/employees', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(employeeData),
+            });
+
+            employeeForm.reset();
+            fetchEmployees();
+        });
+
+        const fetchEmployees = async () => {
+            const response = await fetch('http://localhost:5000/employees');
+            const employees = await response.json();
+            employeeList.innerHTML = employees.map(emp => `<li>${emp.name} - ${emp.position} <button onclick="deleteEmployee('${emp._id}')">Delete</button></li>`).join('');
+        };
+
+        const deleteEmployee = async (id) => {
+            await fetch(`http://localhost:5000/employees/${id}`, {
+                method: 'DELETE',
+            });
+            fetchEmployees();
+        };
+
+        fetchEmployees();
+    </script>
+</body>
+</html>
